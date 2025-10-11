@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from docx import Document
 
 # Load stopwords once
 def load_stopwords(path="sw.txt"):
@@ -7,15 +8,15 @@ def load_stopwords(path="sw.txt"):
         stopwords = set(line.strip() for line in f if line.strip())
     return stopwords
 
-# Remove stopwords but preserve lines
+# Remove stopwords but preserve paragraphs
 def remove_stopwords(text, stopwords):
-    lines = text.splitlines()  # split by line
+    lines = text.splitlines()
     filtered_lines = []
     for line in lines:
-        words = line.split()  # split line by whitespace
+        words = line.split()
         filtered = [w for w in words if w not in stopwords]
         filtered_lines.append(" ".join(filtered))
-    return "\n".join(filtered_lines)  # join lines with newline
+    return "\n".join(filtered_lines)
 
 # Streamlit UI
 st.sidebar.image("images/peacock-3.png", width=200)
@@ -27,36 +28,40 @@ option = st.sidebar.selectbox('Choose an option', select)
 
 if option == "remove-stopwords":
 
-    uploaded_file = st.file_uploader("📂 Choose a .txt file", type=["txt"])
+    uploaded_file = st.file_uploader("📂 Choose a .docx file", type=["docx"])
 
     if uploaded_file is not None:
         try:
-            # Read input text
-            input_text = uploaded_file.read().decode("utf-8")
+            # Load the Word document
+            doc = Document(uploaded_file)
+            full_text = "\n".join([para.text for para in doc.paragraphs])
 
             # Load stopwords
             stopwords = load_stopwords("sw.txt")
 
             # Remove stopwords
-            result = remove_stopwords(input_text, stopwords)
+            result_text = remove_stopwords(full_text, stopwords)
 
-            # Save output
+            # Save processed Word document
             os.makedirs("output", exist_ok=True)
-            output_path = os.path.join("output", "stopwords_removed_output.txt")
-            with open(output_path, "w", encoding="utf-8") as f:
-                f.write(result)
+            output_path = os.path.join("output", "stopwords_removed_output.docx")
+            new_doc = Document()
+            for line in result_text.splitlines():
+                new_doc.add_paragraph(line)
+            new_doc.save(output_path)
 
-            # Download button
-            st.download_button(
-                label="📄 Download Processed File",
-                data=result,
-                file_name="stopwords_removed_output.txt",
-                mime="text/plain"
-            )
+            # Provide download button
+            with open(output_path, "rb") as f:
+                st.download_button(
+                    label="📄 Download Processed Word File",
+                    data=f,
+                    file_name="stopwords_removed_output.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
 
             # Show preview
             st.subheader("📝 Output Preview:")
-            st.text(result)
+            st.text(result_text)
 
         except Exception as e:
             st.error(f"❌ Error processing file: {e}")
