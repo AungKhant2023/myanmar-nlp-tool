@@ -32,6 +32,9 @@ if option == "remove-stopwords":
 
     if uploaded_file is not None:
         try:
+            # Get uploaded file name (without extension)
+            base_filename = os.path.splitext(uploaded_file.name)[0]
+
             # Load the Word document
             doc = Document(uploaded_file)
             full_text = "\n".join([para.text for para in doc.paragraphs])
@@ -44,7 +47,9 @@ if option == "remove-stopwords":
 
             # Save processed Word document
             os.makedirs("output", exist_ok=True)
-            output_path = os.path.join("output", "stopwords_removed_output.docx")
+            output_filename = f"{base_filename}_output.docx"
+            output_path = os.path.join("output", output_filename)
+
             new_doc = Document()
             for line in result_text.splitlines():
                 new_doc.add_paragraph(line)
@@ -53,9 +58,9 @@ if option == "remove-stopwords":
             # Provide download button
             with open(output_path, "rb") as f:
                 st.download_button(
-                    label="📄 Download Processed Word File",
+                    label=f"📄 Download {output_filename}",
                     data=f,
-                    file_name="stopwords_removed_output.docx",
+                    file_name=output_filename,
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
 
