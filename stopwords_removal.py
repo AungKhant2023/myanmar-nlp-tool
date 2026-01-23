@@ -75,7 +75,7 @@
 import streamlit as st
 import os
 from docx import Document
-import utilities
+import utilities_testing
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, models
