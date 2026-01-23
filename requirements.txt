@@ -1,5 +1,6 @@
 pandas
-numpy>=1.26,<2
-tensorflow>=2.20
+numpy>=2.1,<2.4
+tensorflow==2.20.0
+ml-dtypes>=0.5.1
 protobuf>=4
 streamlit>=1.30
