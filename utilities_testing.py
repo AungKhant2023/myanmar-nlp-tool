@@ -5,7 +5,7 @@ import re
 def normalize(text):
     return unicodedata.normalize("NFC", text)
 
-def load_dictionary(file_path="dict-output-v1-18-6-2025.txt"):
+def load_dictionary(file_path="dict-output-v2-4-9-2025.txt"):
     if not os.path.exists(file_path):
         return []
     with open(file_path, "r", encoding="utf-8") as f:
