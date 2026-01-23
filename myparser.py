@@ -218,15 +218,16 @@ class MyParser:
             self.MY_SYLLABLE_CONSONANT  # 109F;MYANMAR SYMBOL SHAN EXCLAMATION;So;0;L;;;;;N;;;;;
         )
 
-    def get_char(self, srtingOrChar):
-        # print type(srtingOrChar)
-        # print isinstance(srtingOrChar, (str, unicode))
-
-        if isinstance(srtingOrChar, str):
-            char = ord(srtingOrChar)
+    def get_char(self, stringOrChar):
+        # Always work on single character
+        if isinstance(stringOrChar, str):
+            if len(stringOrChar) == 0:
+                return -1
+            char = ord(stringOrChar[0])
         else:
-            char = srtingOrChar
+            char = stringOrChar
         return char
+
 
     def get_char_class(self, string):
         char = self.get_char(string)
@@ -321,15 +322,14 @@ class MyParser:
 
     def is_myanmar_char(self, string):
         char = self.get_char(string)
-        if 0x1000 <= char <= 0x109f or 0xaa60 <= char <= 0xaa7f:
-            return True
-        return False
+        if char == -1:
+            return False
+        return (0x1000 <= char <= 0x109F) or (0xAA60 <= char <= 0xAA7F)
+
+
 
     def is_not_myanmar(self, string):
-        charClass = self.get_char_class(string)
-        if charClass in (MMC_OT, MMC_RQ, MMC_LQ, MMC_SP):
-            return True
-        return False
+        return not self.is_myanmar_char(string)
 
 
     def is_neutral(self, string):

@@ -75,6 +75,13 @@
 import streamlit as st
 import os
 from docx import Document
+import utilities
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers, models
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Embedding, LSTM
+
 
 # Load stopwords once
 def load_stopwords(path="sw.txt"):
