@@ -19,8 +19,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
 # USA
-
 import types
+
+MMC_OT = -1
+MMC_RQ = -2
+MMC_LQ = -3
+MMC_SP = -4
+MMC_WJ = -5
+MMC_NJ = -6
 
 
 class MyParser:
@@ -223,20 +229,17 @@ class MyParser:
         return char
 
     def get_char_class(self, string):
-        identifiedClass = self.MY_SYLLABLE_UNKNOWN
         char = self.get_char(string)
 
-        if 0x1000 > char or char > 0x109F:
-            if 0xAA60 <= char < 0xAA7C:
-                if char == 0xAA70:
-                    return self.MY_SYLLABLE_TONE
-                elif char == 0xAA7B:
-                    return self.MY_SYLLABLE_TONE
-                return self.MY_SYLLABLE_CONSONANT
-            return self.MY_SYLLABLE_UNKNOWN
+        # Outside Myanmar Unicode block
+        if char < 0x1000 or char > 0x109F:
+            if isinstance(string, str) and string.isspace():
+                return MMC_SP
+            return MMC_OT
 
-        identifiedClass = self.CHAR_PART[char - 0x1000]
-        return identifiedClass
+        # Inside Myanmar Unicode block
+        return self.CHAR_PART[char - 0x1000]
+
 
     def get_break_status(self, before, after):
 
@@ -323,18 +326,18 @@ class MyParser:
         return False
 
     def is_not_myanmar(self, string):
-        char = self.get_char(string)
-        charClass = self.get_char_class(char)
-        if charClass == MMC_OT or charClass == MMC_RQ or charClass == MMC_LQ or charClass == MMC_SP:
-            return true
-        return false
-
-    def is_neutral(self, string):
-        char = self.get_char(string)
-        charClass = self.get_char_class(char)
-        if charClass == MMC_WJ or charClass == MMC_RQ or charClass == MMC_LQ or charClass == MMC_SP or charClass == MMC_NJ:
+        charClass = self.get_char_class(string)
+        if charClass in (MMC_OT, MMC_RQ, MMC_LQ, MMC_SP):
             return True
         return False
+
+
+    def is_neutral(self, string):
+        charClass = self.get_char_class(string)
+        if charClass in (MMC_WJ, MMC_RQ, MMC_LQ, MMC_SP, MMC_NJ):
+            return True
+        return False
+
 
     def syllable(self, input):
         str = input
