@@ -34,49 +34,49 @@ def segment_myanmar_text(text, dictionary):
             i += 1
     return output
 
-# def syllable_tokenization(input_text: str) -> str:
-#     input_text = normalize(input_text.strip())
-#     dictionary = load_dictionary()
-
-#     pattern = r'[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF]+|[a-zA-Z]+|[0-9၀-၉]+(?:[.,][0-9၀-၉]+)?|[^\s\w]'
-
-#     parts = re.findall(pattern, input_text)
-
-#     result = ""
-#     for part in parts:
-#         part = normalize(part)
-#         if is_number(part):
-#             result += part + " "
-#         elif is_myanmar_word(part):
-#             result += segment_myanmar_text(part, dictionary)
-#         else:
-#             result += part + " "
-
-#     return result.strip()
-
 def syllable_tokenization(input_text: str) -> str:
     input_text = normalize(input_text.strip())
     dictionary = load_dictionary()
 
     pattern = r'[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF]+|[a-zA-Z]+|[0-9၀-၉]+(?:[.,][0-9၀-၉]+)?|[^\s\w]'
 
-    # Split input into lines to preserve sentence structure
-    lines = input_text.splitlines()
-    tokenized_lines = []
+    parts = re.findall(pattern, input_text)
 
-    for line in lines:
-        line = normalize(line.strip())
-        parts = re.findall(pattern, line)
+    result = ""
+    for part in parts:
+        part = normalize(part)
+        if is_number(part):
+            result += part + " "
+        elif is_myanmar_word(part):
+            result += segment_myanmar_text(part, dictionary)
+        else:
+            result += part + " "
 
-        result_line = ""
-        for part in parts:
-            part = normalize(part)
-            if is_number(part):
-                result_line += part + " "
-            elif is_myanmar_word(part):
-                result_line += segment_myanmar_text(part, dictionary)
-            else:
-                result_line += part + " "
-        tokenized_lines.append(result_line.strip())
+    return result.strip()
 
-    return '\n'.join(tokenized_lines)
+# def syllable_tokenization(input_text: str) -> str:
+#     input_text = normalize(input_text.strip())
+#     dictionary = load_dictionary()
+
+#     pattern = r'[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF]+|[a-zA-Z]+|[0-9၀-၉]+(?:[.,][0-9၀-၉]+)?|[^\s\w]'
+
+#     # Split input into lines to preserve sentence structure
+#     lines = input_text.splitlines()
+#     tokenized_lines = []
+
+#     for line in lines:
+#         line = normalize(line.strip())
+#         parts = re.findall(pattern, line)
+
+#         result_line = ""
+#         for part in parts:
+#             part = normalize(part)
+#             if is_number(part):
+#                 result_line += part + " "
+#             elif is_myanmar_word(part):
+#                 result_line += segment_myanmar_text(part, dictionary)
+#             else:
+#                 result_line += part + " "
+#         tokenized_lines.append(result_line.strip())
+
+#     return '\n'.join(tokenized_lines)
