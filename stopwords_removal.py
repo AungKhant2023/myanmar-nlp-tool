@@ -75,32 +75,17 @@
 import streamlit as st
 import os
 from docx import Document
-import utilities_testing
 from io import BytesIO
-
-# Load stopwords once
-def load_stopwords(path="sw.txt"):
-    with open(path, "r", encoding="utf-8") as f:
-        return set(line.strip() for line in f if line.strip())
-
-# Remove stopwords but preserve paragraphs
-def remove_stopwords(text, stopwords):
-    lines = text.splitlines()
-    filtered_lines = []
-    for line in lines:
-        words = line.split()
-        filtered = [w for w in words if w not in stopwords]
-        filtered_lines.append(" ".join(filtered))
-    return "\n".join(filtered_lines)
+import utilities_testing   # this is your NLP engine
 
 # Streamlit UI
 st.sidebar.image("images/peacock-3.png", width=200)
 st.sidebar.markdown("<h3 style='text-align: center;'>NLP Tool</h3>", unsafe_allow_html=True)
 
-select = ['remove-stopwords']
+select = ['tokenize-and-remove-stopwords']
 option = st.sidebar.selectbox('Choose an option', select)
 
-if option == "remove-stopwords":
+if option == "tokenize-and-remove-stopwords":
 
     uploaded_file = st.file_uploader("📂 Choose a .docx file", type=["docx"])
 
@@ -108,15 +93,12 @@ if option == "remove-stopwords":
         try:
             base_filename = os.path.splitext(uploaded_file.name)[0]
 
-            # Load Word document
+            # Read DOCX
             doc = Document(uploaded_file)
             full_text = "\n".join([para.text for para in doc.paragraphs])
 
-            # Load stopwords
-            stopwords = load_stopwords("sw.txt")
-
-            # Remove stopwords
-            result_text = remove_stopwords(full_text, stopwords)
+            # 🔥 Call your tokenizer from utilities_testing.py
+            result_text = utilities_testing.syllable_tokenization(full_text)
 
             # Editable output
             st.subheader("✏️ Edit Text:")
@@ -128,8 +110,6 @@ if option == "remove-stopwords":
 
             # Save & Download
             if st.button("💾 Save & Download Edited File"):
-
-                # Create Word file in memory
                 output_buffer = BytesIO()
                 new_doc = Document()
                 for line in edited_text.splitlines():

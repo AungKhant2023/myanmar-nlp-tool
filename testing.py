@@ -1,19 +1,34 @@
 import streamlit as st
 import os
-import utilities_testing
 from docx import Document
 from io import BytesIO
+import utilities_testing
 
-# Load stopwords
+# -----------------------------
+# Load stopwords once
+# -----------------------------
 with open("sw.txt", encoding="utf-8") as f:
-    stopwords = set(line.strip() for line in f if line.strip())
+    STOPWORDS = set(line.strip() for line in f if line.strip())
 
+
+# -----------------------------
+# Remove stopwords (KEEP lines)
+# -----------------------------
 def remove_stopwords(text, stopwords):
-    words = text.split()
-    filtered = [w for w in words if w not in stopwords]
-    return " ".join(filtered)
+    lines = text.splitlines()
+    filtered_lines = []
 
+    for line in lines:
+        words = line.split()
+        filtered = [w for w in words if w not in stopwords]
+        filtered_lines.append(" ".join(filtered))
+
+    return "\n".join(filtered_lines)
+
+
+# -----------------------------
 # Streamlit UI
+# -----------------------------
 st.sidebar.image("images/peacock-3.png", width=200)
 st.sidebar.markdown("<h3 style='text-align: center;'>NLP Tool</h3>", unsafe_allow_html=True)
 
@@ -26,16 +41,17 @@ if option == "syllable-tokenization":
 
     if uploaded_file is not None:
         try:
-            # Read DOCX content
+            # Read DOCX
             doc = Document(BytesIO(uploaded_file.read()))
             input_text = "\n".join([para.text for para in doc.paragraphs])
 
-            # Tokenize
+            # 🔥 Tokenize (this keeps sentences because your utilities_testing does)
             tokenized = utilities_testing.syllable_tokenization(input_text)
 
-            # Remove stopwords
-            cleaned = remove_stopwords(tokenized, stopwords)
+            # 🔥 Remove stopwords WITHOUT merging sentences
+            cleaned = remove_stopwords(tokenized, STOPWORDS)
 
+            # Editable output
             st.subheader("✏️ Edit Output (You can modify here)")
             edited_text = st.text_area(
                 "Edit your tokenized result:",
@@ -43,15 +59,7 @@ if option == "syllable-tokenization":
                 height=300
             )
 
-            # Create output directory
-            os.makedirs("output", exist_ok=True)
-
-            # Save edited output
-            output_path = os.path.join("output", "syllable_tokenized_output.txt")
-            with open(output_path, "w", encoding="utf-8") as f:
-                f.write(edited_text)
-
-            # Download button
+            # Save & Download as TXT
             st.download_button(
                 label="📄 Download Final Tokenized File",
                 data=edited_text,
@@ -65,7 +73,6 @@ if option == "syllable-tokenization":
 
         except Exception as e:
             st.error(f"❌ Error processing file: {e}")
-
 
 
 # import streamlit as st
