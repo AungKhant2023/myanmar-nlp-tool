@@ -5,6 +5,13 @@ import re
 def normalize(text):
     return unicodedata.normalize("NFC", text)
 
+def load_stopwords(file_path="sw.txt"):
+    if not os.path.exists(file_path):
+        return set()
+    with open(file_path, "r", encoding="utf-8") as f:
+        return set(normalize(line.strip()) for line in f if line.strip())
+
+
 def load_dictionary(file_path="dict-output-v2-4-9-2025.txt"):
     if not os.path.exists(file_path):
         return []
@@ -37,22 +44,42 @@ def segment_myanmar_text(text, dictionary):
 def syllable_tokenization(input_text: str) -> str:
     input_text = normalize(input_text.strip())
     dictionary = load_dictionary()
+    stopwords = load_stopwords()
 
     pattern = r'[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF]+|[a-zA-Z]+|[0-9၀-၉]+(?:[.,][0-9၀-၉]+)?|[^\s\w]'
 
-    parts = re.findall(pattern, input_text)
+    # Preserve original lines/sentences
+    lines = input_text.splitlines()
+    tokenized_lines = []
 
-    result = ""
-    for part in parts:
-        part = normalize(part)
-        if is_number(part):
-            result += part + " "
-        elif is_myanmar_word(part):
-            result += segment_myanmar_text(part, dictionary)
-        else:
-            result += part + " "
+    for line in lines:
+        line = normalize(line.strip())
+        parts = re.findall(pattern, line)
 
-    return result.strip()
+        result_tokens = []
+        for part in parts:
+            part = normalize(part)
+
+            if is_number(part):
+                result_tokens.append(part)
+
+            elif is_myanmar_word(part):
+                segmented = segment_myanmar_text(part, dictionary).strip()
+                words = segmented.split()
+
+                # remove stopwords
+                filtered = [w for w in words if w not in stopwords]
+                result_tokens.extend(filtered)
+
+            else:
+                # punctuation / English / symbols
+                if part not in stopwords:
+                    result_tokens.append(part)
+
+        tokenized_lines.append(" ".join(result_tokens))
+
+    # Each input sentence remains on its own line
+    return "\n".join(tokenized_lines)
 
 # def syllable_tokenization(input_text: str) -> str:
 #     input_text = normalize(input_text.strip())
