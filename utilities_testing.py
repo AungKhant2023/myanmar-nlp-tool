@@ -12,11 +12,11 @@ def load_stopwords(file_path="sw.txt"):
         return set(normalize(line.strip()) for line in f if line.strip())
 
 
-def load_dictionary(file_path="dict-output-v2-4-9-2025.txt"):
-    if not os.path.exists(file_path):
-        return []
-    with open(file_path, "r", encoding="utf-8") as f:
-        return sorted([normalize(line.strip()) for line in f if line.strip()], key=len, reverse=True)
+# def load_dictionary(file_path="dict-output-v2-4-9-2025.txt"):
+#     if not os.path.exists(file_path):
+#         return []
+#     with open(file_path, "r", encoding="utf-8") as f:
+#         return sorted([normalize(line.strip()) for line in f if line.strip()], key=len, reverse=True)
 
 def is_myanmar_word(text):
     return all('\u1000' <= char <= '\u109F' or char in "ါ-ှ" for char in text if char.strip())
@@ -43,7 +43,7 @@ def segment_myanmar_text(text, dictionary):
 
 def syllable_tokenization(input_text: str) -> str:
     input_text = normalize(input_text.strip())
-    dictionary = load_dictionary()
+    # dictionary = load_dictionary()
     stopwords = load_stopwords()
 
     pattern = r'[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF]+|[a-zA-Z]+|[0-9၀-၉]+(?:[.,][0-9၀-၉]+)?|[^\s\w]'
@@ -63,13 +63,13 @@ def syllable_tokenization(input_text: str) -> str:
             if is_number(part):
                 result_tokens.append(part)
 
-            elif is_myanmar_word(part):
-                segmented = segment_myanmar_text(part, dictionary).strip()
-                words = segmented.split()
+            # elif is_myanmar_word(part):
+            #     segmented = segment_myanmar_text(part, dictionary).strip()
+            #     words = segmented.split()
 
-                # remove stopwords
-                filtered = [w for w in words if w not in stopwords]
-                result_tokens.extend(filtered)
+            #     # remove stopwords
+            #     filtered = [w for w in words if w not in stopwords]
+            #     result_tokens.extend(filtered)
 
             else:
                 # punctuation / English / symbols
